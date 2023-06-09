@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -17,9 +19,23 @@ var (
 	folder      string = "/tmp/vcluster"
 	clustername string = "mycluster"
 	targetns    string = "vcluster-ns"
+	help               = flag.Bool("help", false, "Show help")
 )
 
 func main() {
+	// Parsing arguments
+	flag.StringVar(&clustername, "clustername", "mycluster", "The name of the cluster to be created")
+	flag.StringVar(&targetns, "targetns", "vcluster-ns", "The name of the namespace where deploy the cluster to")
+	flag.StringVar(&folder, "folder", "/tmp/vcluster", "The path where the resultant kubeconfig will be placed")
+
+	flag.Parse()
+
+	if *help {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	/* === Cluster creation === */
 	var openshiftIngress = &openshiftApi.Ingress{}
 
 	// Create a new k8s client
@@ -44,9 +60,19 @@ func main() {
 
 	// Print kubeconfig to check that it is in place
 	file, err := os.Open(myKubeconfig)
+	defer file.Close()
+
 	if err != nil {
-		log.Println("Something went wrong when trying to read kubeconfig ", myKubeconfig)
+		log.Println("Something went wrong when trying to open kubeconfig ", myKubeconfig)
 		log.Fatal(err)
 	}
-	fmt.Println(file)
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Printf("Something went wrong when trying to read kubeconfig's %s content", myKubeconfig)
+		log.Fatal(err)
+	}
+
+	fmt.Printf("\n=== Printing Kubeconfig:\n")
+	fmt.Println(string(data))
 }

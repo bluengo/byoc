@@ -6,6 +6,9 @@
 *.dylib
 *.xml
 
+# Binary of the application
+byoc
+
 # Test binary, built with `go test -c`
 *.test
 coverage.*
