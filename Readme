@@ -1,8 +1,0 @@
-# Launch
-
-```bash
-    go mod tidy
-    go mod vendor
-    go build
-    ./<launch-binary-name-generated>
-```
